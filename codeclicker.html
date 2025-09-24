@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Code Clicker</title>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Code Clicker</title>
+  ...
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Consolas, monospace;
+      overflow: hidden;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: -1;
+      /* Hintergrund */
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: rgb(255, 255, 255);
+      text-shadow: 0 0 5px black;
+    }
+
+    #score {
+      font-size: 40px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    #clickBtn {
+      width: 200px;
+      height: auto;
+      cursor: pointer;
+      transition: transform 0.1s;
+    }
+
+    #clickBtn:active {
+      transform: scale(0.9);
+    }
+
+    #shop {
+      margin-top: 40px;
+      border-top: 2px solid #00ff99;
+      padding-top: 20px;
+      width: 300px;
+      max-height: 400px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    #shop::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #shop::-webkit-scrollbar-thumb {
+      background-color: #00ff99;
+      border-radius: 4px;
+    }
+
+    .shop-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 5px;
+      background: rgba(0, 255, 153, 0.2);
+      border-radius: 5px;
+    }
+
+    .shop-item button {
+      cursor: pointer;
+      padding: 5px 10px;
+      background: #00ff99;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 3px;
+    }
+
+    .shop-item button:disabled {
+      background: #444;
+      color: #888;
+      cursor: not-allowed;
+    }
+
+    #machines {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 250px;
+    }
+
+    #machines h3 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
+      text-align: left;
+    }
+
+    #machines div {
+      font-size: 14px;
+      margin: 2px 0;
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="matrix"></canvas>
+
+  <div id="machines">
+    <h3>Automatic Coders:</h3>
+    <div id="machineServer">Server: 0</div>
+    <div id="machinePC">PC: 0</div>
+    <div id="machineAI">KI-Cluster: 0</div>
+  </div>
+
+  <div id="score">0 lines of code</div>
+  <img id="clickBtn"
+    src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWJlbDc1ZnJqczJnMXB6M3V0MGF2dzlxdGJuMmdmOWRxenZnNGh1NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/6KirhLJyR7oMcwgJQk/giphy.gif"
+    alt="Click me">
+
+  <div id="shop">
+    <h2>Shop</h2>
+    <!-- Klick-Upgrades -->
+    <div class="shop-item"><span>+1 per click</span><button data-cost="10" data-bonus="1">Buy (10)</button></div>
+    <div class="shop-item"><span>+5 per click</span><button data-cost="50" data-bonus="5">Buy (50)</button></div>
+    <div class="shop-item"><span>+10 per click</span><button data-cost="100" data-bonus="10">Buy (100)</button></div>
+
+    <!-- Automatische Maschinen -->
+    <div class="shop-item"><span>Server (+1/sec)</span><button data-cost="200" data-machine="server" data-rate="1">Buy
+        (200)</button></div>
+    <div class="shop-item"><span>PC (+5/sec)</span><button data-cost="1000" data-machine="pc" data-rate="5">Buy
+        (1000)</button></div>
+    <div class="shop-item"><span>KI-Cluster (+20/sec)</span><button data-cost="5000" data-machine="ai"
+        data-rate="20">Buy (5000)</button></div>
+  </div>
+
+  <script>
+    // ===== MATRIX HINTERGRUND =====
+    const canvas = document.getElementById("matrix");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const letters = "01";
+    const fontSize = 16;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+    for (let i = 0; i < columns; i++) drops[i] = Math.random() * -100;
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(40, 40, 40, 0.3)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#00ff99";
+      ctx.font = fontSize + "px monospace";
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters.charAt(Math.floor(Math.random() * letters.length));
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+    setInterval(drawMatrix, 50);
+    window.addEventListener("resize", () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // ===== SPIEL LOGIK =====
+    let score = 0;
+    let bonus = 1;
+    const machines = { server: 0, pc: 0, ai: 0 };
+
+    const scoreEl = document.getElementById('score');
+    const clickBtn = document.getElementById('clickBtn');
+    const shopButtons = document.querySelectorAll('.shop-item button');
+
+    const machineServerEl = document.getElementById('machineServer');
+    const machinePCEl = document.getElementById('machinePC');
+    const machineAIEl = document.getElementById('machineAI');
+
+    function updateScore() {
+      scoreEl.textContent = score + ' lines of code';
+      machineServerEl.textContent = `Server: ${machines.server}`;
+      machinePCEl.textContent = `PC: ${machines.pc}`;
+      machineAIEl.textContent = `AI: ${machines.ai}`;
+      shopButtons.forEach(btn => {
+        const cost = parseInt(btn.dataset.cost);
+        btn.disabled = score < cost;
+      });
+    }
+
+    clickBtn.addEventListener('click', () => {
+      score += bonus;
+      new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg").play();
+      updateScore();
+    });
+
+    shopButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cost = parseInt(btn.dataset.cost);
+        if (score >= cost) {
+          score -= cost;
+
+          // Klick-Upgrade
+          if (btn.dataset.bonus) {
+            bonus += parseInt(btn.dataset.bonus);
+          }
+
+          // Maschine
+          if (btn.dataset.machine) {
+            const machine = btn.dataset.machine;
+            machines[machine]++;
+
+          }
+
+          new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg").play();
+          updateScore();
+        }
+      });
+    });
+
+    // ===== AUTOMATISCHE PRODUKTION =====
+    setInterval(() => {
+      const autoAdd = machines.server * 1 + machines.pc * 5 + machines.ai * 20;
+      score += autoAdd;
+      updateScore();
+    }, 1000); // jede Sekunde
+
+    updateScore();
+  </script>
+</body>
+
+</html>
