@@ -1,23 +1,20 @@
 <!DOCTYPE html>
-<html lang="de">
-
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Code Clicker</title>
-
-  <meta charset="UTF-8">
+  <title>Earth Clicker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Code Clicker</title>
-  ...
+
   <style>
-    html,
-    body {
+    html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
-      font-family: Consolas, monospace;
+      font-family: "Calibri";
       overflow: hidden;
+      color: white;
+      text-shadow: 0 0 5px black;
     }
 
     canvas {
@@ -25,16 +22,25 @@
       top: 0;
       left: 0;
       z-index: -1;
-      /* Hintergrund */
     }
 
-    body {
+    #game-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-start;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    #left-panel {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      color: rgb(255, 255, 255);
-      text-shadow: 0 0 5px black;
     }
 
     #score {
@@ -44,33 +50,42 @@
     }
 
     #clickBtn {
-      width: 200px;
+      width: 400px;
       height: auto;
       cursor: pointer;
       transition: transform 0.1s;
+      position: relative;
     }
 
     #clickBtn:active {
       transform: scale(0.9);
     }
 
-    #shop {
-      margin-top: 40px;
-      border-top: 2px solid #00ff99;
-      padding-top: 20px;
-      width: 300px;
-      max-height: 400px;
+    #right-panel {
+      flex: 1;
+      max-width: 400px;
+      background: rgba(0, 0, 0, 0.4);
+      padding: 15px;
+      border-radius: 8px;
       overflow-y: auto;
-      scrollbar-width: thin;
+      max-height: 90vh;
     }
 
-    #shop::-webkit-scrollbar {
-      width: 8px;
+    #machines h3 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+      text-align: left;
     }
 
-    #shop::-webkit-scrollbar-thumb {
-      background-color: #00ff99;
-      border-radius: 4px;
+    #machines div {
+      font-size: 14px;
+      margin: 3px 0;
+    }
+
+    #shop {
+      margin-top: 20px;
+      border-top: 2px solid #228B22;
+      padding-top: 15px;
     }
 
     .shop-item {
@@ -78,18 +93,21 @@
       justify-content: space-between;
       margin-bottom: 10px;
       padding: 5px;
-      background: rgba(0, 255, 153, 0.2);
+      background: rgba(34, 139, 34, 0.2);
       border-radius: 5px;
+      position: relative;
     }
 
     .shop-item button {
       cursor: pointer;
       padding: 5px 10px;
-      background: #00ff99;
-      color: black;
+      background: #228B22;
+      color: white;
       font-weight: bold;
       border: none;
       border-radius: 3px;
+      position: relative;
+      overflow: visible;
     }
 
     .shop-item button:disabled {
@@ -98,117 +116,161 @@
       cursor: not-allowed;
     }
 
-    #machines {
-      position: fixed;
-      top: 10px;
-      left: 10px;
-      background: rgba(0, 0, 0, 0.5);
-      padding: 10px;
-      border-radius: 5px;
-      max-width: 250px;
+    .click-effect {
+      position: absolute;
+      top: -20px; /* above button or image */
+      left: 50%;
+      transform: translateX(-50%);
+      color: yellow;
+      font-weight: bold;
+      font-size: 20px;
+      pointer-events: none;
+      z-index: 1000;
+      animation: rise 1s ease-out forwards;
     }
 
-    #machines h3 {
-      margin: 0 0 5px 0;
-      font-size: 16px;
-      text-align: left;
+    @keyframes rise {
+      0% { opacity: 1; transform: translateX(-50%) translateY(0); }
+      100% { opacity: 0; transform: translateX(-50%) translateY(-30px); }
     }
 
-    #machines div {
-      font-size: 14px;
-      margin: 2px 0;
+    #right-panel::-webkit-scrollbar-thumb {
+      background-color: #228B22;
+      border-radius: 4px;
     }
   </style>
 </head>
-
 <body>
   <canvas id="matrix"></canvas>
 
-  <div id="machines">
-    <h3>Automatic Coders:</h3>
-    <div id="machineServer">Server: 0</div>
-    <div id="machinePC">PC: 0</div>
-    <div id="machineAI">KI-Cluster: 0</div>
-  </div>
+  <div id="game-container">
+    <div id="left-panel">
+      <div id="score">0 Earths</div>
+      <div style="position: relative;">
+        <img id="clickBtn"
+          src="https://i.ibb.co/MxCdMJ24/Chat-GPT-Image-25-Sept-2025-16-37-51-removebg-preview.png"
+          alt="Click the Earth">
+      </div>
+    </div>
 
-  <div id="score">0 lines of code</div>
-  <img id="clickBtn"
-    src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWJlbDc1ZnJqczJnMXB6M3V0MGF2dzlxdGJuMmdmOWRxenZnNGh1NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/6KirhLJyR7oMcwgJQk/giphy.gif"
-    alt="Click me">
+    <div id="right-panel">
+      <div id="machines">
+        <h3>Natural Helpers:</h3>
+        <div id="machineTree">Trees: 0</div>
+        <div id="machineGarden">Gardens: 0</div>
+        <div id="machineForest">Forests: 0</div>
+      </div>
 
-  <div id="shop">
-    <h2>Shop</h2>
-    <!-- Klick-Upgrades -->
-    <div class="shop-item"><span>+1 per click</span><button data-cost="10" data-bonus="1">Buy (10)</button></div>
-    <div class="shop-item"><span>+5 per click</span><button data-cost="50" data-bonus="5">Buy (50)</button></div>
-    <div class="shop-item"><span>+10 per click</span><button data-cost="100" data-bonus="10">Buy (100)</button></div>
+      <div id="shop">
+        <h2>Shop</h2>
+        <div class="shop-item"><span>+1 per click</span><button data-cost="10" data-bonus="1">Buy (10)</button></div>
+        <div class="shop-item"><span>+5 per click</span><button data-cost="50" data-bonus="5">Buy (50)</button></div>
+        <div class="shop-item"><span>+10 per click</span><button data-cost="100" data-bonus="10">Buy (100)</button></div>
 
-    <!-- Automatische Maschinen -->
-    <div class="shop-item"><span>Server (+1/sec)</span><button data-cost="200" data-machine="server" data-rate="1">Buy
-        (200)</button></div>
-    <div class="shop-item"><span>PC (+5/sec)</span><button data-cost="1000" data-machine="pc" data-rate="5">Buy
-        (1000)</button></div>
-    <div class="shop-item"><span>KI-Cluster (+20/sec)</span><button data-cost="5000" data-machine="ai"
-        data-rate="20">Buy (5000)</button></div>
+        <div class="shop-item"><span>Tree (+1/sec)</span><button data-cost="200" data-machine="tree" data-rate="1">Buy (200)</button></div>
+        <div class="shop-item"><span>Garden (+5/sec)</span><button data-cost="1000" data-machine="garden" data-rate="5">Buy (1000)</button></div>
+        <div class="shop-item"><span>Forest (+20/sec)</span><button data-cost="5000" data-machine="forest" data-rate="20">Buy (5000)</button></div>
+      </div>
+    </div>
   </div>
 
   <script>
-    // ===== MATRIX HINTERGRUND =====
+    // ===== FALLING IMAGES WITHOUT TRAIL =====
     const canvas = document.getElementById("matrix");
     const ctx = canvas.getContext("2d");
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const letters = "01";
-    const fontSize = 16;
-    const columns = canvas.width / fontSize;
-    const drops = [];
-    for (let i = 0; i < columns; i++) drops[i] = Math.random() * -100;
+    const imagesSrc = [
+      "https://i.ibb.co/tTgX05n1/Chat-GPT-Image-25-Sept-2025-17-44-01.png"
+    ];
 
-    function drawMatrix() {
-      ctx.fillStyle = "rgba(40, 40, 40, 0.3)";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#00ff99";
-      ctx.font = fontSize + "px monospace";
-      for (let i = 0; i < drops.length; i++) {
-        const text = letters.charAt(Math.floor(Math.random() * letters.length));
-        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
+    const images = [];
+    let loadedImages = 0;
+
+    imagesSrc.forEach(src => {
+      const img = new Image();
+      img.src = src;
+      img.onload = () => loadedImages++;
+      images.push(img);
+    });
+
+    const numSprites = 10;
+    const sprites = [];
+
+    for (let i = 0; i < numSprites; i++) {
+      sprites.push({
+        img: images[Math.floor(Math.random() * imagesSrc.length)],
+        x: Math.random() * canvas.width,
+        y: Math.random() * -canvas.height,
+        speed: 5 + Math.random() * 5,
+        scale: 0.01 + Math.random() * 0.1
+      });
+    }
+
+    function drawMatrixImages() {
+      ctx.fillStyle = "#2d2d2d"; // gewünschte Farbe
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      if (loadedImages < imagesSrc.length) return;
+
+      for (let i = 0; i < sprites.length; i++) {
+        const s = sprites[i];
+        ctx.drawImage(s.img, s.x, s.y, s.img.width * s.scale, s.img.height * s.scale);
+        s.y += s.speed;
+
+        if (s.y > canvas.height) {
+          s.y = -s.img.height * s.scale;
+          s.x = Math.random() * canvas.width;
+          s.speed = 5 + Math.random() * 5;
+          s.scale = 0.05 + Math.random() * 0.1;
+          s.img = images[Math.floor(Math.random() * imagesSrc.length)];
+        }
       }
     }
-    setInterval(drawMatrix, 50);
+
+    setInterval(drawMatrixImages, 50);
+
     window.addEventListener("resize", () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
     });
 
-    // ===== SPIEL LOGIK =====
+    // ===== GAME LOGIC =====
     let score = 0;
     let bonus = 1;
-    const machines = { server: 0, pc: 0, ai: 0 };
+    const machines = { tree: 0, garden: 0, forest: 0 };
 
     const scoreEl = document.getElementById('score');
     const clickBtn = document.getElementById('clickBtn');
     const shopButtons = document.querySelectorAll('.shop-item button');
 
-    const machineServerEl = document.getElementById('machineServer');
-    const machinePCEl = document.getElementById('machinePC');
-    const machineAIEl = document.getElementById('machineAI');
+    const machineTreeEl = document.getElementById('machineTree');
+    const machineGardenEl = document.getElementById('machineGarden');
+    const machineForestEl = document.getElementById('machineForest');
 
     function updateScore() {
-      scoreEl.textContent = score + ' lines of code';
-      machineServerEl.textContent = `Server: ${machines.server}`;
-      machinePCEl.textContent = `PC: ${machines.pc}`;
-      machineAIEl.textContent = `AI: ${machines.ai}`;
+      scoreEl.textContent = score + ' Earths';
+      machineTreeEl.textContent = `Trees: ${machines.tree}`;
+      machineGardenEl.textContent = `Gardens: ${machines.garden}`;
+      machineForestEl.textContent = `Forests: ${machines.forest}`;
       shopButtons.forEach(btn => {
         const cost = parseInt(btn.dataset.cost);
         btn.disabled = score < cost;
       });
     }
 
+    function showClickEffect(element, amount) {
+      const effect = document.createElement('span');
+      effect.className = 'click-effect';
+      effect.textContent = `+${amount}`;
+      element.parentElement.appendChild(effect); // relative to parent div
+      setTimeout(() => effect.remove(), 1000);
+    }
+
     clickBtn.addEventListener('click', () => {
       score += bonus;
+      showClickEffect(clickBtn, bonus);
       new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg").play();
       updateScore();
     });
@@ -219,16 +281,16 @@
         if (score >= cost) {
           score -= cost;
 
-          // Klick-Upgrade
           if (btn.dataset.bonus) {
-            bonus += parseInt(btn.dataset.bonus);
+            const b = parseInt(btn.dataset.bonus);
+            bonus += b;
+            showClickEffect(btn, b);
           }
 
-          // Maschine
           if (btn.dataset.machine) {
             const machine = btn.dataset.machine;
             machines[machine]++;
-
+            showClickEffect(btn, parseInt(btn.dataset.rate));
           }
 
           new Audio("https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg").play();
@@ -237,15 +299,13 @@
       });
     });
 
-    // ===== AUTOMATISCHE PRODUKTION =====
     setInterval(() => {
-      const autoAdd = machines.server * 1 + machines.pc * 5 + machines.ai * 20;
+      const autoAdd = machines.tree * 1 + machines.garden * 5 + machines.forest * 20;
       score += autoAdd;
       updateScore();
-    }, 1000); // jede Sekunde
+    }, 1000);
 
     updateScore();
   </script>
 </body>
-
 </html>
